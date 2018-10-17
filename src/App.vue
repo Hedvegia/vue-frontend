@@ -1,20 +1,22 @@
 <template>
   <div id="app">
     <h1>{{ hello }}</h1>
+    <items-list></items-list>
   </div>
 </template>
 
 <script>
-import gql from 'graphql-tag'
+import { hello } from './gql'
+import ItemsList from './components/Items'
+
 export default {
   apollo: {
-    hello: gql`
-      query {
-      hello
-    }
-  `
+    hello
   },
   name: 'app',
+  components: {
+    ItemsList
+  }
 }
 </script>
 
@@ -40,9 +42,5 @@ ul {
 li {
   display: inline-block;
   margin: 0 10px;
-}
-
-a {
-  color: #42b983;
 }
 </style>
