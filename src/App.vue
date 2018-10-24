@@ -1,35 +1,60 @@
 <template>
   <div id="app">
-    <h1>{{ hello }}</h1>
+    <h1>TODOS:</h1>
     <items-list></items-list>
-    <p v-show="!isEdit" v-on:click="showInput()">{{message}}</p>
+    <button v-show="!isEdit" v-on:click="trueInput()">Add</button>
     <div v-show="isEdit">
+      <p>Title: </p>
       <input @input="handleInput($event.target.value)">
-      <button v-on:click="showInput()">SAVE</button>
+      <p>Notes: </p>
+      <input @input="handleNotes($event.target.value)">
+      <p>Completed </p>
+      <select v-model="selected">
+        <option disabled value="">Please select one</option>
+        <option>pending</option>
+        <option>completed</option>
+        <option>todo</option>
+      </select>
+      <button v-on:click="falseInput()">SAVE</button>
     </div>
   </div>
 </template>
 
 <script>
-import { hello } from './gql'
+import { CREATE_TODO } from './gql'
 import ItemsList from './components/Items'
+import swal from 'sweetalert';
 
 export default {
-  apollo: {
-    hello
-  },
   data: () => {
     return {
-      message: "valami",
-      isEdit: false
+      isEdit: false,
+      title: "",
+      notes: "",
+      selected: ""
     }
   },
   methods: {
     handleInput(value) {
-      this.message = value
+      this.title = value
     },
-    showInput() {
-      this.isEdit = !this.isEdit
+    handleNotes(value) {
+      this.notes = value
+    },
+    trueInput() {
+      this.isEdit = true
+    },
+    falseInput() {
+      this.$apollo.mutate({
+        mutation: CREATE_TODO,
+        variables: { input: { title: this.title, notes: this.notes, state: this.selected } }
+      })
+      .then(response => {
+        this.$apollo.provider.defaultClient.resetStore()
+        swal({title: 'Successfully added', icon: "success"})
+      })
+      .catch(err => swal({ title: "Something happened.:(", icon: "error" }))
+      this.isEdit = false
     }
   },
   name: 'app',
@@ -48,6 +73,7 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  display: flex;
 }
 
 h1, h2 {

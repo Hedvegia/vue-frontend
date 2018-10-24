@@ -11,16 +11,25 @@
       v-on:click="getAlert(item.id)">
     </items>
     <div v-show="!isEdit">
-      <p>{{ message }}</p>
+      <p>Title: </p>
       <input @input="handleInput($event.target.value)">
-      <button v-on:click="deleteData()">SAVE</button>
+      <p>Notes: </p>
+      <input @input="handleNotes($event.target.value)">
+      <p>Completed </p>
+      <select v-model="selected">
+        <option disabled value="">Please select one</option>
+        <option>pending</option>
+        <option>completed</option>
+        <option>todo</option>
+      </select>
+      <button v-on:click="saveData()">SAVE</button>
     </div>
   </div>
 </template>
 
 <script>
 import Items from './allItems'
-import { ITEMS } from '../gql'
+import { ITEMS, UPDATE_ITEMS } from '../gql'
 import swal from 'sweetalert';
 
 export default {
@@ -29,9 +38,11 @@ export default {
     return {
       getItems: [],
       loading: 0,
-      message: "",
       isEdit: true,
-      itemId: ""
+      itemId: "",
+      title: "",
+      notes: "",
+      selected: ""
     }
   },
   components: {
@@ -51,9 +62,23 @@ export default {
         }
       })
     },
-    deleteData() {
+    saveData() {
+      this.$apollo.mutate({
+        mutation: UPDATE_ITEMS,
+        variables: {id: this.itemId, input: { title: this.message, notes: this.notes, state: this.selected }}
+      }).then(response => {
+        this.$apollo.provider.defaultClient.resetStore()
+        swal({title: 'succesfull update', icon: "success"})
+      }).catch(err => swal({title: "there was an error", icon: "error"}))
+      this.message = ""
       this.itemId = ""
       this.isEdit = true
+    },
+    handleInput(value) {
+      this.message = value
+    },
+    handleNotes(value) {
+      this.notes = value
     }
   }
 }
