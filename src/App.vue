@@ -2,6 +2,11 @@
   <div id="app">
     <h1>{{ hello }}</h1>
     <items-list></items-list>
+    <p v-show="!isEdit" v-on:click="showInput()">{{message}}</p>
+    <div v-show="isEdit">
+      <input @input="handleInput($event.target.value)">
+      <button v-on:click="showInput()">SAVE</button>
+    </div>
   </div>
 </template>
 
@@ -13,14 +18,29 @@ export default {
   apollo: {
     hello
   },
+  data: () => {
+    return {
+      message: "valami",
+      isEdit: false
+    }
+  },
+  methods: {
+    handleInput(value) {
+      this.message = value
+    },
+    showInput() {
+      this.isEdit = !this.isEdit
+    }
+  },
   name: 'app',
   components: {
     ItemsList
-  }
+  },
 }
 </script>
 
 <style>
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -34,13 +54,8 @@ h1, h2 {
   font-weight: normal;
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
+p {
+   cursor: pointer
+ }
 
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
 </style>

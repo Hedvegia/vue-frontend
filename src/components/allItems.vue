@@ -1,10 +1,10 @@
 <template>
-  <p>todo: {{ item.title }} </p>
+  <p v-on:click="getAlert(item.id)" v-show="itemId !== item.id">todo: {{ item.title }} </p>
 </template>
 
 <script>
   export default {
     name: 'Items',
-    props: ['item']
+    props: ['item', 'getAlert', 'itemId'],
   }
 </script>

@@ -9,11 +9,12 @@ export const hello = gql`
 export const ITEMS = gql`
   query {
     getItems {
+      id
       title
       where
       when
-      to
       notes
+      state
     }
   }
 `
