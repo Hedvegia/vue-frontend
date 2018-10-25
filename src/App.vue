@@ -1,22 +1,25 @@
 <template>
   <div id="app">
-    <h1>TODOS:</h1>
-    <items-list></items-list>
-    <button v-show="!isEdit" v-on:click="trueInput()">Add</button>
-    <div v-show="isEdit">
+    <div class="container">
+      <h1>TODOS:</h1>
+      <div v-show="!isEdit" class="main" v-on:click="trueInput()">+</div>
+    </div>
+    <div class="flex" v-show="isEdit">
       <p>Title: </p>
-      <input @input="handleInput($event.target.value)">
+      <input @input="handleInput($event.target.value)" placeholder="">
       <p>Notes: </p>
-      <input @input="handleNotes($event.target.value)">
-      <p>Completed </p>
+      <input @input="handleNotes($event.target.value)" placeholder="">
+      <p>Completed: </p>
       <select v-model="selected">
-        <option disabled value="">Please select one</option>
+        <option disabled value=""></option>
         <option>pending</option>
         <option>completed</option>
         <option>todo</option>
       </select>
-      <button v-on:click="falseInput()">SAVE</button>
+      <button class="left" v-on:click="closeAdd()">BACK</button>
+      <button class="right" v-on:click="falseInput()">SAVE</button>
     </div>
+    <items-list></items-list>
   </div>
 </template>
 
@@ -55,6 +58,12 @@ export default {
       })
       .catch(err => swal({ title: "Something happened.:(", icon: "error" }))
       this.isEdit = false
+      this.title = ""
+      this.select = ""
+      this.notes = ""
+    },
+    closeAdd() {
+      this.isEdit = false
     }
   },
   name: 'app',
@@ -70,18 +79,96 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
-  display: flex;
 }
 
-h1, h2 {
+body {
+  display: flex;
+  justify-content: center;
+}
+
+.flex-container, .flex {
+  display: flex;
+  flex-wrap: wrap;
+  width: 20em;
+  border-radius: 5px;
+  margin: 1em;
+  border: 1px solid rgba(46, 46, 46, 0.2);
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 20em;
+}
+
+.flex-container:hover {
+  transform: scale(1.03);
+}
+
+#todo {
+  background: rgba(68, 173, 214, 0.158)
+}
+
+#completed {
+  background: rgba(157, 238, 137, 0.178);
+}
+
+#pending {
+  background: rgba(255, 255, 0, 0.164);
+}
+
+h1 {
   font-weight: normal;
+  width: 85%;
+  text-align: center
 }
 
 p {
-   cursor: pointer
+   cursor: pointer;
+   width: 40%;
+   padding-left: 1em;
  }
+
+input, select {
+  margin: auto;
+  width: 9em;
+  height: 2em;
+  background: white;
+}
+
+button {
+  width: 50%;
+  height: 3em;
+  border: none;
+  border-top: 1px solid rgba(46, 46, 46, 0.2);
+}
+
+button:hover {
+  transform: scale(1.03);
+  background: white;
+}
+
+.left {
+  border-right: 1px solid rgba(46, 46, 46, 0.2);
+}
+
+.right {
+  border-left: 1px solid rgba(46, 46, 46, 0.2);
+}
+
+.main {
+  margin-top: 0.45em;
+  border-radius: 50%;
+  font-size: 2.7em;
+  height: 1em;
+  width: 1em;
+  color: rgba(68, 173, 214, 0.726);
+}
+
+.main:hover {
+  cursor: pointer;
+  transform: scale(0.9);
+}
 
 </style>

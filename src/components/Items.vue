@@ -8,28 +8,20 @@
       :getAlert="getAlert"
       :isEdit="itemId !== item.id"
       :itemId="itemId"
-      v-on:click="getAlert(item.id)">
+      :saveData="saveData"
+      :deleteItem="deleteItem"
+      :handleNotes="handleNotes"
+      :handleInput="handleInput"
+      :back="back"
+      :onChange="onChange"
+      :completeTodo="completeTodo">
     </items>
-    <div v-show="!isEdit">
-      <p>Title: </p>
-      <input @input="handleInput($event.target.value)">
-      <p>Notes: </p>
-      <input @input="handleNotes($event.target.value)">
-      <p>Completed </p>
-      <select v-model="selected">
-        <option disabled value="">Please select one</option>
-        <option>pending</option>
-        <option>completed</option>
-        <option>todo</option>
-      </select>
-      <button v-on:click="saveData()">SAVE</button>
-    </div>
   </div>
 </template>
 
 <script>
 import Items from './allItems'
-import { ITEMS, UPDATE_ITEMS } from '../gql'
+import { ITEMS, UPDATE_ITEMS, DELETE_ITEM } from '../gql'
 import swal from 'sweetalert';
 
 export default {
@@ -38,11 +30,10 @@ export default {
     return {
       getItems: [],
       loading: 0,
-      isEdit: true,
       itemId: "",
       title: "",
       notes: "",
-      selected: ""
+      selected: "",
     }
   },
   components: {
@@ -55,27 +46,61 @@ export default {
   },
   methods: {
     getAlert(itemId) {
+      this.itemId = itemId
+    },
+    completeTodo(item) {
+      if (item.state === "todo") {
+        return this.$apollo.mutate({
+          mutation: UPDATE_ITEMS,
+          variables: { id: item.id, input: { state: "pending" } }
+        }).then(() => this.$apollo.provider.defaultClient.resetStore())
+      } else if (item.state === "pending") {
+        return this.$apollo.mutate({
+          mutation: UPDATE_ITEMS,
+          variables: { id: item.id, input: { state: "completed" } }
+        }).then(() => this.$apollo.provider.defaultClient.resetStore())
+      } else {
+        this.itemId = item.id
+      }
+    },
+    deleteItem(itemId) {
+      this.$apollo.mutate({
+        mutation: DELETE_ITEM,
+        variables: { id: itemId }
+      }).then(response => {
+        swal({title: 'succesfull deleted', icon: "success"})
+        this.itemId = ""
+        this.$apollo.provider.defaultClient.resetStore()
+      }).catch(err => swal({title: "there was an error", icon: "error"}))
+    },
+    onChange(value) {
+      this.selected = value
+    },
+    back() {
+      this.itemId = ""
+    },
+    saveData(itemId) {
+      let data
       this.getItems.map(item => {
         if (item.id === itemId) {
-          this.isEdit = false
-          this.itemId = itemId
+          data = item
         }
       })
-    },
-    saveData() {
       this.$apollo.mutate({
         mutation: UPDATE_ITEMS,
-        variables: {id: this.itemId, input: { title: this.message, notes: this.notes, state: this.selected }}
+        variables: {id: itemId, input: {
+          title: this.title !== "" ? this.title : data.title,
+          notes: this.notes !== "" ? this.notes : data.notes,
+          state: this.selected !== "" ? this.selected : data.state
+        }}
       }).then(response => {
-        this.$apollo.provider.defaultClient.resetStore()
         swal({title: 'succesfull update', icon: "success"})
+        this.itemId = ""
+        this.$apollo.provider.defaultClient.resetStore()
       }).catch(err => swal({title: "there was an error", icon: "error"}))
-      this.message = ""
-      this.itemId = ""
-      this.isEdit = true
     },
     handleInput(value) {
-      this.message = value
+      this.title = value
     },
     handleNotes(value) {
       this.notes = value
