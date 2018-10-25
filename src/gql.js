@@ -32,3 +32,13 @@ export const CREATE_TODO = gql`
     }
   }
 `
+export const DELETE_ITEM = gql`
+  mutation DeleteOne($id: String) {
+    deleteOne(id: $id) {
+      id
+      title
+      notes
+      state
+    }
+  }
+`
